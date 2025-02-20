@@ -16,7 +16,9 @@ fn main() {
 }
 
 fn process_path(path: &Path) {
-  let walker = WalkBuilder::new(path).build();
+  let walker = WalkBuilder::new(path)
+    .sort_by_file_path(|a, b| a.cmp(b))
+    .build();
   for result in walker {
     match result {
       Ok(entry) => {

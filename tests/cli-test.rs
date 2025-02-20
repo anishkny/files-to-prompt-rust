@@ -19,7 +19,7 @@ fn test_files_to_prompt(input: &[&str], golden_filename: &str) {
 
   // Run the CLI tool
   println!("Running CLI tool with input: {:?}", input);
-  let output = Command::new("cargo")
+  let output = Command::new("./target/release/files-to-prompt")
     .args(["run", "--"].iter().chain(input.iter()))
     .output()
     .expect("Failed to execute command");

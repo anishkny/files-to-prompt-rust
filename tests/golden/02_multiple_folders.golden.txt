@@ -1,0 +1,36 @@
+tests/inputs/02_multiple_folders/f1/file2.txt
+----
+Contents of file2.txt
+
+----
+
+tests/inputs/02_multiple_folders/f1/file1.txt
+----
+Contents of file1.txt
+
+----
+
+tests/inputs/02_multiple_folders/f1/folder/file3.txt
+----
+Contents of file3.txt
+
+----
+
+tests/inputs/02_multiple_folders/f2/file2.txt
+----
+Contents of file2.txt
+
+----
+
+tests/inputs/02_multiple_folders/f2/file1.txt
+----
+Contents of file1.txt
+
+----
+
+tests/inputs/02_multiple_folders/f2/folder/file3.txt
+----
+Contents of file3.txt
+
+----
+

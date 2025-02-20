@@ -1,0 +1,11 @@
+[package]
+name = "files-to-prompt"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ignore = "0.4.23"
+
+[dev-dependencies]
+goldenfile = "1.8.0"
+test-case = "3.3.1"

@@ -1,0 +1,2 @@
+Contents of file1.txt
+

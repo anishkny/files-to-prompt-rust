@@ -1,0 +1,6 @@
+tests/inputs/03_gitignore/file2.txt
+----
+Contents of file2.txt
+
+----
+

@@ -1,17 +1,22 @@
+use clap::Parser;
 use ignore::WalkBuilder;
-use std::env;
 use std::fs;
 use std::path::Path;
 use std::str;
 
-fn main() {
-  let args: Vec<String> = env::args().skip(1).collect();
-  if args.is_empty() {
-    eprintln!("Usage: files-to-prompt <path1> [path2] ...");
-    std::process::exit(1);
-  }
+#[derive(Parser, Debug)]
+#[command(
+  version,
+  about = "Concatenates a directory full of files into a single prompt for use with LLMs."
+)]
+struct Args {
+  #[arg(default_value = ".")]
+  paths: Vec<String>,
+}
 
-  for path in &args {
+fn main() {
+  let args = Args::parse();
+  for path in &args.paths {
     process_path(Path::new(path));
   }
 }

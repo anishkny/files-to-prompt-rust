@@ -12,6 +12,7 @@ exclude = [".github"]
 readme = "README.md"
 
 [dependencies]
+clap = { version = "4.5.30", features = ["derive"] }
 ignore = "0.4.23"
 
 [dev-dependencies]

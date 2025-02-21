@@ -7,6 +7,12 @@ use test_case::test_case;
 mod helpers;
 use helpers::rename_gitignore_files;
 
+const TARGET: &str = if cfg!(debug_assertions) {
+  "./target/debug/files-to-prompt"
+} else {
+  "./target/release/files-to-prompt"
+};
+
 #[test_case(&["tests/inputs/01_basic"], "01_basic.golden.txt"; "01_basic")]
 #[test_case(
   &["tests/inputs/02_multiple_folders/f1", "tests/inputs/02_multiple_folders/f2"],
@@ -21,16 +27,13 @@ fn test_files_to_prompt(input: &[&str], golden_filename: &str) {
 
   // Run the CLI tool
   println!("Running CLI tool with input: {:?}", input);
-  let output = Command::new("./target/release/files-to-prompt")
+  let output = Command::new(TARGET)
     .args(["run", "--"].iter().chain(input.iter()))
     .output()
     .expect("Failed to execute command");
 
   // Ensure the command was successful
   assert!(output.status.success());
-
-  // Print the output
-  println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
 
   // Write the output to a golden file
   let mut mint = Mint::new("tests/golden");

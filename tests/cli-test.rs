@@ -13,6 +13,7 @@ use helpers::rename_gitignore_files;
   "02_multiple_folders.golden.txt"; "02_multiple_folders"
 )]
 #[test_case(&["tests/inputs/03_gitignore"], "03_gitignore.golden.txt"; "03_gitignore")]
+#[test_case(&["tests/inputs/04_invalid_utf8"], "04_invalid_utf8.golden.txt"; "04_invalid_utf8")]
 fn test_files_to_prompt(input: &[&str], golden_filename: &str) {
   // Rename gitignore files to .gitignore if they exist
   let _gitignore_renamers = rename_gitignore_files(input);

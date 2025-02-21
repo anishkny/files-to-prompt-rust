@@ -2,6 +2,7 @@ use ignore::WalkBuilder;
 use std::env;
 use std::fs;
 use std::path::Path;
+use std::str;
 
 fn main() {
   let args: Vec<String> = env::args().skip(1).collect();
@@ -33,10 +34,11 @@ fn process_path(path: &Path) {
 }
 
 fn print_file(path: &Path) {
-  match fs::read_to_string(path) {
-    Ok(contents) => {
-      println!("{}\n----\n{}\n----\n", path.display(), contents);
-    }
+  match fs::read(path) {
+    Ok(bytes) => match str::from_utf8(&bytes) {
+      Ok(contents) => println!("{}\n----\n{}\n----\n", path.display(), contents),
+      Err(_) => eprintln!("Warning: Skipping non-UTF-8 file: {}", path.display()),
+    },
     Err(err) => eprintln!("Could not read {}: {}", path.display(), err),
   }
 }

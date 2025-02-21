@@ -1,0 +1,6 @@
+tests/inputs/04_invalid_utf8/file1.txt
+----
+Contents of file1.txt
+
+----
+

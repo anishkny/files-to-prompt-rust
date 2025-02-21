@@ -1,0 +1,12 @@
+tests/inputs/05_hidden/.hidden.txt
+----
+file2
+
+----
+
+tests/inputs/05_hidden/file1.txt
+----
+file
+
+----
+

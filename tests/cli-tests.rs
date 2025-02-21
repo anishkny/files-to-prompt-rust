@@ -21,6 +21,7 @@ const TARGET: &str = if cfg!(debug_assertions) {
 #[test_case(&["tests/inputs/03_gitignore"], "03_gitignore.golden.txt"; "03_gitignore")]
 #[test_case(&["tests/inputs/04_invalid_utf8"], "04_invalid_utf8.golden.txt"; "04_invalid_utf8")]
 #[test_case(&["tests/inputs/05_hidden"], "05_hidden.golden.txt"; "05_hidden")]
+#[test_case(&["tests/inputs/05_hidden", "--include-hidden"], "05a_include_hidden.golden.txt"; "05a_include_hidden")]
 fn test_files_to_prompt(input: &[&str], golden_filename: &str) {
   // Rename gitignore files to .gitignore if they exist
   let _gitignore_renamers = rename_gitignore_files(input);
@@ -28,7 +29,7 @@ fn test_files_to_prompt(input: &[&str], golden_filename: &str) {
   // Run the CLI tool
   println!("Running CLI tool with input: {:?}", input);
   let output = Command::new(TARGET)
-    .args(["run", "--"].iter().chain(input.iter()))
+    .args(input.iter())
     .output()
     .expect("Failed to execute command");
 

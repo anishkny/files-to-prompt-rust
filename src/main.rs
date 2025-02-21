@@ -12,17 +12,25 @@ use std::str;
 struct Args {
   #[arg(default_value = ".")]
   paths: Vec<String>,
+
+  #[arg(
+    long = "include-hidden",
+    default_value_t = false,
+    help = "Include hidden files in the output"
+  )]
+  include_hidden: bool,
 }
 
 fn main() {
   let args = Args::parse();
   for path in &args.paths {
-    process_path(Path::new(path));
+    process_path(Path::new(path), args.include_hidden);
   }
 }
 
-fn process_path(path: &Path) {
+fn process_path(path: &Path, include_hidden: bool) {
   let walker = WalkBuilder::new(path)
+    .hidden(!include_hidden)
     .sort_by_file_path(|a, b| a.cmp(b))
     .build();
   for result in walker {

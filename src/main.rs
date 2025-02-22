@@ -27,11 +27,19 @@ struct Args {
     action = clap::ArgAction::Append
   )]
   ignore_patterns: Vec<String>,
+
+  #[arg(
+    long = "ignore-gitignore",
+    default_value_t = false,
+    help = "Ignore .gitignore files when scanning directories"
+  )]
+  ignore_gitignore: bool,
 }
 
 struct ProcessPathOptions {
   include_hidden: bool,
   ignore_patterns: Vec<String>,
+  ignore_gitignore: bool,
 }
 
 fn main() {
@@ -39,6 +47,7 @@ fn main() {
   let process_path_options = ProcessPathOptions {
     include_hidden: args.include_hidden,
     ignore_patterns: args.ignore_patterns.clone(),
+    ignore_gitignore: args.ignore_gitignore,
   };
   for path in &args.paths {
     process_path(Path::new(path), &process_path_options);
@@ -49,9 +58,11 @@ fn process_path(path: &Path, options: &ProcessPathOptions) {
   let ProcessPathOptions {
     include_hidden,
     ignore_patterns,
+    ignore_gitignore,
   } = options;
   let mut walker = WalkBuilder::new(path);
   walker.hidden(!include_hidden);
+  walker.git_ignore(!ignore_gitignore);
 
   let mut glob_builder = GlobSetBuilder::new();
   for pattern in ignore_patterns {

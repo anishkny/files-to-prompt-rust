@@ -1,0 +1,13 @@
+tests/inputs/07_ignore_gitignore/file1.txt
+----
+Contents of file1.txt
+
+
+----
+
+tests/inputs/07_ignore_gitignore/file2.txt
+----
+Contents of file2.txt
+
+----
+

@@ -1,0 +1,15 @@
+tests/inputs/06_ignore/file1.txt
+----
+file1
+
+----
+
+tests/inputs/06_ignore/file4.json
+----
+{
+  "foo": 1,
+  "bar": 2
+}
+
+----
+

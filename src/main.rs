@@ -1,6 +1,7 @@
 use clap::Parser;
 use globset::{Glob, GlobSetBuilder};
 use ignore::WalkBuilder;
+use std::collections::BTreeSet;
 use std::fs;
 use std::path::Path;
 use std::str;
@@ -47,7 +48,6 @@ struct ProcessPathOptions {
   include_hidden: bool,
   ignore_patterns: Vec<String>,
   ignore_gitignore: bool,
-  line_numbers: bool,
 }
 
 struct PrintFileOptions {
@@ -60,19 +60,29 @@ fn main() {
     include_hidden: args.include_hidden,
     ignore_patterns: args.ignore_patterns.clone(),
     ignore_gitignore: args.ignore_gitignore,
+  };
+
+  let print_file_options = PrintFileOptions {
     line_numbers: args.line_numbers,
   };
+
+  // Collect all the files in the given paths
+  let mut file_paths = BTreeSet::new();
   for path in &args.paths {
-    process_path(Path::new(path), &process_path_options);
+    process_path(Path::new(path), &process_path_options, &mut file_paths);
+  }
+
+  // Print the contents of each file
+  for file_path in file_paths {
+    print_file(Path::new(&file_path), &print_file_options);
   }
 }
 
-fn process_path(path: &Path, options: &ProcessPathOptions) {
+fn process_path(path: &Path, options: &ProcessPathOptions, file_paths: &mut BTreeSet<String>) {
   let ProcessPathOptions {
     include_hidden,
     ignore_patterns,
     ignore_gitignore,
-    line_numbers,
   } = options;
   let mut walker = WalkBuilder::new(path);
   walker.hidden(!include_hidden);
@@ -88,7 +98,6 @@ fn process_path(path: &Path, options: &ProcessPathOptions) {
 
   let walker = walker
     .filter_entry(move |entry| !glob_set.is_match(entry.path()))
-    .sort_by_file_path(|a, b| a.cmp(b))
     .build();
 
   for result in walker {
@@ -96,10 +105,9 @@ fn process_path(path: &Path, options: &ProcessPathOptions) {
       Ok(entry) => {
         let entry_path = entry.path();
         if entry_path.is_file() {
-          let print_file_options = PrintFileOptions {
-            line_numbers: *line_numbers,
-          };
-          print_file(entry_path, &print_file_options);
+          if let Some(file_path) = entry_path.to_str() {
+            file_paths.insert(file_path.to_string());
+          }
         }
       }
       Err(err) => eprintln!("Error: {}", err),

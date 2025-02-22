@@ -25,6 +25,7 @@ const TARGET: &str = if cfg!(debug_assertions) {
 #[test_case(&["tests/inputs/06_ignore", "--ignore", "*.md", "--ignore", "*.csv"], "06_ignore.golden.txt"; "06_ignore")]
 #[test_case(&["tests/inputs/07_ignore_gitignore", "--ignore-gitignore"], "07_ignore_gitignore.golden.txt"; "07_ignore_gitignore")]
 #[test_case(&["tests/inputs/01_basic", "--line-numbers"], "08_line_numbers.golden.txt"; "08_line_numbers")]
+#[test_case(&["tests/inputs/01_basic", "tests/inputs/01_basic/file1.txt"], "09_dedupe.golden.txt"; "09_dedupe")]
 fn test_files_to_prompt(input: &[&str], golden_filename: &str) {
   // Rename gitignore files to .gitignore if they exist
   let _gitignore_renamers = rename_gitignore_files(input);

@@ -34,12 +34,24 @@ struct Args {
     help = "Ignore .gitignore files when scanning directories"
   )]
   ignore_gitignore: bool,
+
+  #[arg(
+    long = "line-numbers",
+    default_value_t = false,
+    help = "Include line numbers in the output"
+  )]
+  line_numbers: bool,
 }
 
 struct ProcessPathOptions {
   include_hidden: bool,
   ignore_patterns: Vec<String>,
   ignore_gitignore: bool,
+  line_numbers: bool,
+}
+
+struct PrintFileOptions {
+  line_numbers: bool,
 }
 
 fn main() {
@@ -48,6 +60,7 @@ fn main() {
     include_hidden: args.include_hidden,
     ignore_patterns: args.ignore_patterns.clone(),
     ignore_gitignore: args.ignore_gitignore,
+    line_numbers: args.line_numbers,
   };
   for path in &args.paths {
     process_path(Path::new(path), &process_path_options);
@@ -59,6 +72,7 @@ fn process_path(path: &Path, options: &ProcessPathOptions) {
     include_hidden,
     ignore_patterns,
     ignore_gitignore,
+    line_numbers,
   } = options;
   let mut walker = WalkBuilder::new(path);
   walker.hidden(!include_hidden);
@@ -82,7 +96,10 @@ fn process_path(path: &Path, options: &ProcessPathOptions) {
       Ok(entry) => {
         let entry_path = entry.path();
         if entry_path.is_file() {
-          print_file(entry_path);
+          let print_file_options = PrintFileOptions {
+            line_numbers: *line_numbers,
+          };
+          print_file(entry_path, &print_file_options);
         }
       }
       Err(err) => eprintln!("Error: {}", err),
@@ -90,10 +107,20 @@ fn process_path(path: &Path, options: &ProcessPathOptions) {
   }
 }
 
-fn print_file(path: &Path) {
+fn print_file(path: &Path, options: &PrintFileOptions) {
   match fs::read(path) {
     Ok(bytes) => match str::from_utf8(&bytes) {
-      Ok(contents) => println!("{}\n----\n{}\n----\n", path.display(), contents),
+      Ok(contents) => {
+        println!("{}\n----", path.display());
+        if options.line_numbers {
+          for (i, line) in contents.lines().enumerate() {
+            println!("{:>4}  {}", i + 1, line);
+          }
+        } else {
+          print!("{}", contents);
+        }
+        println!("\n----\n");
+      }
       Err(_) => eprintln!("Warning: Skipping non-UTF-8 file: {}", path.display()),
     },
     Err(err) => eprintln!("Could not read {}: {}", path.display(), err),

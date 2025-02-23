@@ -1,0 +1,101 @@
+tests/inputs/11_markdown/sample.c
+```c
+#include <stdio.h>
+int main() {
+    printf("Hello, C!\n");
+    return 0;
+}
+```
+
+tests/inputs/11_markdown/sample.cpp
+```cpp
+#include <iostream>
+int main() {
+    std::cout << "Hello, C++!" << std::endl;
+    return 0;
+}
+```
+
+tests/inputs/11_markdown/sample.css
+```css
+body {
+    background-color: lightblue;
+    font-family: Arial, sans-serif;
+}
+```
+
+tests/inputs/11_markdown/sample.html
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sample HTML</title>
+</head>
+<body>
+    <h1>Hello, HTML!</h1>
+</body>
+</html>
+```
+
+tests/inputs/11_markdown/sample.java
+```java
+public class Sample {
+    public static void main(String[] args) {
+        System.out.println("Hello, Java!");
+    }
+}
+```
+
+tests/inputs/11_markdown/sample.js
+```javascript
+console.log("Hello, JavaScript!");
+```
+
+tests/inputs/11_markdown/sample.json
+```json
+{
+    "message": "Hello, JSON!"
+}
+```
+
+tests/inputs/11_markdown/sample.py
+```python
+print("Hello, Python!")
+```
+
+tests/inputs/11_markdown/sample.rb
+```ruby
+puts "Hello, Ruby!"
+```
+
+tests/inputs/11_markdown/sample.sh
+```bash
+#!/bin/bash
+echo "Hello, Shell Script!"
+```
+
+tests/inputs/11_markdown/sample.ts
+```typescript
+let message: string = "Hello, TypeScript!";
+console.log(message);
+```
+
+tests/inputs/11_markdown/sample.xml
+```xml
+<note>
+    <to>User</to>
+    <from>AI</from>
+    <message>Hello, XML!</message>
+</note>
+```
+
+tests/inputs/11_markdown/sample.yaml
+```yaml
+message: "Hello, YAML!"
+```
+
+tests/inputs/11_markdown/sample.yml
+```yaml
+message: "Hello, YML!"
+```
+

@@ -1,7 +1,7 @@
 use clap::Parser;
 use globset::{Glob, GlobSetBuilder};
 use ignore::WalkBuilder;
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 use std::fs;
 use std::path::Path;
 use std::str;
@@ -48,9 +48,19 @@ struct Args {
     short = 'c',
     long = "cxml",
     default_value_t = false,
-    help = "Output in XML-ish format suitable for Claude's long context window."
+    help = "Output in XML-ish format suitable for Claude's long context window.",
+    conflicts_with = "markdown"
   )]
   cxml: bool,
+
+  #[arg(
+    short = 'm',
+    long = "markdown",
+    default_value_t = false,
+    help = "Output Markdown fenced code blocks.",
+    conflicts_with = "cxml"
+  )]
+  markdown: bool,
 }
 
 struct ProcessPathOptions {
@@ -62,6 +72,7 @@ struct ProcessPathOptions {
 struct PrintFileOptions {
   line_numbers: bool,
   cxml: bool,
+  markdown: bool,
 }
 
 fn main() {
@@ -75,6 +86,7 @@ fn main() {
   let print_file_options = PrintFileOptions {
     line_numbers: args.line_numbers,
     cxml: args.cxml,
+    markdown: args.markdown,
   };
 
   // Collect all the files in the given paths
@@ -143,6 +155,8 @@ fn print_file(path: &Path, options: &PrintFileOptions) {
         // Header
         if options.cxml {
           println!("<document path=\"{}\">", path.display());
+        } else if options.markdown {
+          println!("{}\n```{}", path.display(), path_to_markdown_language(path));
         } else {
           println!("{}\n----", path.display());
         }
@@ -159,6 +173,8 @@ fn print_file(path: &Path, options: &PrintFileOptions) {
         // Footer
         if options.cxml {
           println!("</document>");
+        } else if options.markdown {
+          println!("```\n");
         } else {
           println!("\n----\n");
         }
@@ -167,4 +183,33 @@ fn print_file(path: &Path, options: &PrintFileOptions) {
     },
     Err(err) => eprintln!("Could not read {}: {}", path.display(), err),
   }
+}
+
+// Map file extension to markdown fence language
+fn path_to_markdown_language(path: &Path) -> String {
+  let ext_to_lang: HashMap<&str, &str> = [
+    ("c", "c"),
+    ("cpp", "cpp"),
+    ("css", "css"),
+    ("html", "html"),
+    ("java", "java"),
+    ("js", "javascript"),
+    ("json", "json"),
+    ("py", "python"),
+    ("rb", "ruby"),
+    ("sh", "bash"),
+    ("ts", "typescript"),
+    ("xml", "xml"),
+    ("yaml", "yaml"),
+    ("yml", "yaml"),
+  ]
+  .iter()
+  .cloned()
+  .collect();
+
+  if let Some(extension) = path.extension().and_then(|ext| ext.to_str()) {
+    return ext_to_lang.get(extension).unwrap_or(&extension).to_string();
+  }
+
+  "plaintext".to_string()
 }

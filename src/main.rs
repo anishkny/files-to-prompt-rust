@@ -3,6 +3,7 @@ use globset::{Glob, GlobSetBuilder};
 use ignore::WalkBuilder;
 use std::collections::{BTreeSet, HashMap};
 use std::fs;
+use std::io::{self, Write};
 use std::path::Path;
 use std::str;
 
@@ -61,6 +62,9 @@ struct Args {
     conflicts_with = "cxml"
   )]
   markdown: bool,
+
+  #[arg(short = 'o', long = "output", help = "Output file (default: stdout)")]
+  output: Option<String>,
 }
 
 struct ProcessPathOptions {
@@ -95,8 +99,14 @@ fn main() {
     process_path(Path::new(path), &process_path_options, &mut file_paths);
   }
 
-  // Print the files
-  print_files(file_paths, &print_file_options);
+  // Print the files to stdout (or a file if specified)
+  let output: Box<dyn Write> = match &args.output {
+    Some(output_file) => {
+      Box::new(fs::File::create(output_file).expect("Could not create output file"))
+    }
+    None => Box::new(io::stdout()),
+  };
+  print_files(file_paths, &print_file_options, output);
 }
 
 fn process_path(path: &Path, options: &ProcessPathOptions, file_paths: &mut BTreeSet<String>) {
@@ -136,47 +146,57 @@ fn process_path(path: &Path, options: &ProcessPathOptions, file_paths: &mut BTre
   }
 }
 
-fn print_files(file_paths: BTreeSet<String>, options: &PrintFileOptions) {
+fn print_files(
+  file_paths: BTreeSet<String>,
+  options: &PrintFileOptions,
+  mut output: Box<dyn Write>,
+) {
   if options.cxml {
-    println!("<documents>");
+    writeln!(output, "<documents>").unwrap();
   }
   for file_path in file_paths {
-    print_file(&Path::new(&file_path), options);
+    print_file(&Path::new(&file_path), options, &mut output);
   }
   if options.cxml {
-    println!("</documents>");
+    writeln!(output, "</documents>").unwrap();
   }
 }
 
-fn print_file(path: &Path, options: &PrintFileOptions) {
+fn print_file(path: &Path, options: &PrintFileOptions, output: &mut dyn Write) {
   match fs::read(path) {
     Ok(bytes) => match str::from_utf8(&bytes) {
       Ok(contents) => {
         // Header
         if options.cxml {
-          println!("<document path=\"{}\">", path.display());
+          writeln!(output, "<document path=\"{}\">", path.display()).unwrap();
         } else if options.markdown {
-          println!("{}\n```{}", path.display(), path_to_markdown_language(path));
+          writeln!(
+            output,
+            "{}\n```{}",
+            path.display(),
+            path_to_markdown_language(path)
+          )
+          .unwrap();
         } else {
-          println!("{}\n----", path.display());
+          writeln!(output, "{}\n----", path.display()).unwrap();
         }
 
         // Contents
         if options.line_numbers {
           for (i, line) in contents.lines().enumerate() {
-            println!("{:>4}  {}", i + 1, line);
+            writeln!(output, "{:>4}  {}", i + 1, line).unwrap();
           }
         } else {
-          print!("{}", contents);
+          write!(output, "{}", contents).unwrap();
         }
 
         // Footer
         if options.cxml {
-          println!("</document>");
+          writeln!(output, "</document>").unwrap();
         } else if options.markdown {
-          println!("```\n");
+          writeln!(output, "```\n").unwrap();
         } else {
-          println!("\n----\n");
+          writeln!(output, "\n----\n").unwrap();
         }
       }
       Err(_) => eprintln!("Warning: Skipping non-UTF-8 file: {}", path.display()),

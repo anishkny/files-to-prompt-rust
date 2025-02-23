@@ -25,7 +25,7 @@ jobs:
       - name: Build
         run: cargo build --release
       - name: Test
-        run: cargo test --release
+        run: cargo test --release -- --nocapture
       - name: Publish
         if: startsWith(github.ref, 'refs/tags/v')
         env:

@@ -1,11 +1,12 @@
 use goldenfile::Mint;
+use std::fs::read_to_string;
 use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 use test_case::test_case;
 
 mod helpers;
-use helpers::rename_gitignore_files;
+use helpers::{get_temp_output_file_path, rename_gitignore_files};
 
 const TARGET: &str = if cfg!(debug_assertions) {
   "./target/debug/files-to-prompt"
@@ -28,6 +29,7 @@ const TARGET: &str = if cfg!(debug_assertions) {
 #[test_case(&["tests/inputs/01_basic", "tests/inputs/01_basic/file1.txt"], "09_dedupe.golden.txt"; "09_dedupe")]
 #[test_case(&["tests/inputs/01_basic", "--cxml"], "10_cxml.golden.txt"; "10_cxml")]
 #[test_case(&["tests/inputs/11_markdown", "--markdown"], "11_markdown.golden.txt"; "11_markdown")]
+#[test_case(&["tests/inputs/01_basic", "--output", get_temp_output_file_path()], "12_output.golden.txt"; "12_output")]
 fn test_files_to_prompt(input: &[&str], golden_filename: &str) {
   // Rename gitignore files to .gitignore if they exist
   let _gitignore_renamers = rename_gitignore_files(input);
@@ -49,7 +51,18 @@ fn test_files_to_prompt(input: &[&str], golden_filename: &str) {
     .new_goldenfile(golden_path)
     .expect("Failed to create golden file");
 
-  golden_file
-    .write_all(&output.stdout)
-    .expect("Failed to write to golden file");
+  // Handle the case where the output is written to a temporary file
+  if golden_filename == "12_output.golden.txt" {
+    golden_file
+      .write_all(
+        read_to_string(get_temp_output_file_path())
+          .unwrap()
+          .as_bytes(),
+      )
+      .expect("Failed to write to golden file");
+  } else {
+    golden_file
+      .write_all(&output.stdout)
+      .expect("Failed to write to golden file");
+  }
 }

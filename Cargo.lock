@@ -197,6 +197,7 @@ dependencies = [
  "globset",
  "goldenfile",
  "ignore",
+ "tempfile",
  "test-case",
 ]
 

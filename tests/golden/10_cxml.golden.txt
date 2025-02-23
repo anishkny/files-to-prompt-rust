@@ -1,0 +1,11 @@
+<documents>
+<document path="tests/inputs/01_basic/file1.txt">
+Contents of file1.txt
+</document>
+<document path="tests/inputs/01_basic/file2.txt">
+Contents of file2.txt
+</document>
+<document path="tests/inputs/01_basic/folder/file3.txt">
+Contents of file3.txt
+</document>
+</documents>

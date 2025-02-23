@@ -37,11 +37,20 @@ struct Args {
   ignore_gitignore: bool,
 
   #[arg(
+    short = 'n',
     long = "line-numbers",
     default_value_t = false,
     help = "Include line numbers in the output"
   )]
   line_numbers: bool,
+
+  #[arg(
+    short = 'c',
+    long = "cxml",
+    default_value_t = false,
+    help = "Output in XML-ish format suitable for Claude's long context window."
+  )]
+  cxml: bool,
 }
 
 struct ProcessPathOptions {
@@ -52,6 +61,7 @@ struct ProcessPathOptions {
 
 struct PrintFileOptions {
   line_numbers: bool,
+  cxml: bool,
 }
 
 fn main() {
@@ -64,6 +74,7 @@ fn main() {
 
   let print_file_options = PrintFileOptions {
     line_numbers: args.line_numbers,
+    cxml: args.cxml,
   };
 
   // Collect all the files in the given paths
@@ -72,10 +83,8 @@ fn main() {
     process_path(Path::new(path), &process_path_options, &mut file_paths);
   }
 
-  // Print the contents of each file
-  for file_path in file_paths {
-    print_file(Path::new(&file_path), &print_file_options);
-  }
+  // Print the files
+  print_files(file_paths, &print_file_options);
 }
 
 fn process_path(path: &Path, options: &ProcessPathOptions, file_paths: &mut BTreeSet<String>) {
@@ -115,11 +124,30 @@ fn process_path(path: &Path, options: &ProcessPathOptions, file_paths: &mut BTre
   }
 }
 
+fn print_files(file_paths: BTreeSet<String>, options: &PrintFileOptions) {
+  if options.cxml {
+    println!("<documents>");
+  }
+  for file_path in file_paths {
+    print_file(&Path::new(&file_path), options);
+  }
+  if options.cxml {
+    println!("</documents>");
+  }
+}
+
 fn print_file(path: &Path, options: &PrintFileOptions) {
   match fs::read(path) {
     Ok(bytes) => match str::from_utf8(&bytes) {
       Ok(contents) => {
-        println!("{}\n----", path.display());
+        // Header
+        if options.cxml {
+          println!("<document path=\"{}\">", path.display());
+        } else {
+          println!("{}\n----", path.display());
+        }
+
+        // Contents
         if options.line_numbers {
           for (i, line) in contents.lines().enumerate() {
             println!("{:>4}  {}", i + 1, line);
@@ -127,7 +155,13 @@ fn print_file(path: &Path, options: &PrintFileOptions) {
         } else {
           print!("{}", contents);
         }
-        println!("\n----\n");
+
+        // Footer
+        if options.cxml {
+          println!("</document>");
+        } else {
+          println!("\n----\n");
+        }
       }
       Err(_) => eprintln!("Warning: Skipping non-UTF-8 file: {}", path.display()),
     },

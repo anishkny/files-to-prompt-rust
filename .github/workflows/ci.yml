@@ -1,6 +1,8 @@
 name: CI
 
-on: push
+on:
+  - push
+  - pull_request
 
 jobs:
   build:
@@ -31,3 +33,6 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: cargo publish --no-verify
+      - name: Merge Dependabot PR
+        if: github.actor == 'dependabot[bot]' && github.event.pull_request
+        run: gh pr merge ${{ github.event.pull_request.number }} --squash --merge

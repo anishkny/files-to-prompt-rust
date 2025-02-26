@@ -50,7 +50,7 @@ struct Args {
     long = "cxml",
     default_value_t = false,
     help = "Output in XML-ish format suitable for Claude's long context window.",
-    conflicts_with = "markdown"
+    conflicts_with_all = &["markdown", "json"]
   )]
   cxml: bool,
 
@@ -59,12 +59,21 @@ struct Args {
     long = "markdown",
     default_value_t = false,
     help = "Output Markdown fenced code blocks.",
-    conflicts_with = "cxml"
+    conflicts_with_all = &["cxml", "json"]
   )]
   markdown: bool,
 
   #[arg(short = 'o', long = "output", help = "Output file (default: stdout)")]
   output: Option<String>,
+
+  #[arg(
+    short = 'j',
+    long = "json",
+    default_value_t = false,
+    help = "Output JSON compatible with CodeSandbox API/CLI.",
+    conflicts_with_all = &["cxml", "markdown"]
+  )]
+  json: bool,
 }
 
 struct ProcessPathOptions {
@@ -77,6 +86,7 @@ struct PrintFileOptions {
   line_numbers: bool,
   cxml: bool,
   markdown: bool,
+  json: bool,
 }
 
 fn main() {
@@ -91,6 +101,7 @@ fn main() {
     line_numbers: args.line_numbers,
     cxml: args.cxml,
     markdown: args.markdown,
+    json: args.json,
   };
 
   // Collect all the files in the given paths
@@ -153,16 +164,26 @@ fn print_files(
 ) {
   if options.cxml {
     writeln!(output, "<documents>").unwrap();
+  } else if options.json {
+    writeln!(output, "{{\n  \"files\": {{").unwrap();
   }
-  for file_path in file_paths {
-    print_file(&Path::new(&file_path), options, &mut output);
+  let last_file_path = file_paths.iter().last().unwrap();
+  for file_path in &file_paths {
+    print_file(
+      &Path::new(&file_path),
+      options,
+      &mut output,
+      file_path == last_file_path,
+    );
   }
   if options.cxml {
     writeln!(output, "</documents>").unwrap();
+  } else if options.json {
+    writeln!(output, "  }}\n}}").unwrap();
   }
 }
 
-fn print_file(path: &Path, options: &PrintFileOptions, output: &mut dyn Write) {
+fn print_file(path: &Path, options: &PrintFileOptions, output: &mut dyn Write, is_last: bool) {
   match fs::read(path) {
     Ok(bytes) => match str::from_utf8(&bytes) {
       Ok(contents) => {
@@ -177,6 +198,8 @@ fn print_file(path: &Path, options: &PrintFileOptions, output: &mut dyn Write) {
             path_to_markdown_language(path)
           )
           .unwrap();
+        } else if options.json {
+          writeln!(output, "    \"{}\": {{", path.display()).unwrap();
         } else {
           writeln!(output, "{}\n----", path.display()).unwrap();
         }
@@ -186,6 +209,8 @@ fn print_file(path: &Path, options: &PrintFileOptions, output: &mut dyn Write) {
           for (i, line) in contents.lines().enumerate() {
             writeln!(output, "{:>4}  {}", i + 1, line).unwrap();
           }
+        } else if options.json {
+          writeln!(output, "      \"contents\": {:?}", contents).unwrap();
         } else {
           write!(output, "{}", contents).unwrap();
         }
@@ -195,6 +220,12 @@ fn print_file(path: &Path, options: &PrintFileOptions, output: &mut dyn Write) {
           writeln!(output, "</document>").unwrap();
         } else if options.markdown {
           writeln!(output, "```\n").unwrap();
+        } else if options.json {
+          if is_last {
+            writeln!(output, "    }}").unwrap();
+          } else {
+            writeln!(output, "    }},").unwrap();
+          }
         } else {
           writeln!(output, "\n----\n").unwrap();
         }

@@ -1,0 +1,46 @@
+{
+  "files": {
+    "tests/inputs/11_markdown/sample.c": {
+      "contents": "#include <stdio.h>\nint main() {\n    printf(\"Hello, C!\\n\");\n    return 0;\n}\n"
+    },
+    "tests/inputs/11_markdown/sample.cpp": {
+      "contents": "#include <iostream>\nint main() {\n    std::cout << \"Hello, C++!\" << std::endl;\n    return 0;\n}\n"
+    },
+    "tests/inputs/11_markdown/sample.css": {
+      "contents": "body {\n    background-color: lightblue;\n    font-family: Arial, sans-serif;\n}\n"
+    },
+    "tests/inputs/11_markdown/sample.html": {
+      "contents": "<!DOCTYPE html>\n<html>\n<head>\n    <title>Sample HTML</title>\n</head>\n<body>\n    <h1>Hello, HTML!</h1>\n</body>\n</html>\n"
+    },
+    "tests/inputs/11_markdown/sample.java": {
+      "contents": "public class Sample {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, Java!\");\n    }\n}\n"
+    },
+    "tests/inputs/11_markdown/sample.js": {
+      "contents": "console.log(\"Hello, JavaScript!\");\n"
+    },
+    "tests/inputs/11_markdown/sample.json": {
+      "contents": "{\n    \"message\": \"Hello, JSON!\"\n}\n"
+    },
+    "tests/inputs/11_markdown/sample.py": {
+      "contents": "print(\"Hello, Python!\")\n"
+    },
+    "tests/inputs/11_markdown/sample.rb": {
+      "contents": "puts \"Hello, Ruby!\"\n"
+    },
+    "tests/inputs/11_markdown/sample.sh": {
+      "contents": "#!/bin/bash\necho \"Hello, Shell Script!\"\n"
+    },
+    "tests/inputs/11_markdown/sample.ts": {
+      "contents": "let message: string = \"Hello, TypeScript!\";\nconsole.log(message);\n"
+    },
+    "tests/inputs/11_markdown/sample.xml": {
+      "contents": "<note>\n    <to>User</to>\n    <from>AI</from>\n    <message>Hello, XML!</message>\n</note>\n"
+    },
+    "tests/inputs/11_markdown/sample.yaml": {
+      "contents": "message: \"Hello, YAML!\"\n"
+    },
+    "tests/inputs/11_markdown/sample.yml": {
+      "contents": "message: \"Hello, YML!\"\n"
+    }
+  }
+}

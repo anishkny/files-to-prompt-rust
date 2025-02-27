@@ -6,64 +6,103 @@
 
 `files-to-prompt` is a command-line tool that recursively reads all files in a specified directory (respecting `.gitignore`) and concatenates their contents into a structured format, making it easy to use as a prompt for Large Language Models (LLMs).
 
-## Features
-
-- Recursively scans directories and reads all files
-- Outputs file paths along with their contents
-- Respects `.gitignore`
-- Ignores hidden files be default
-- Sorts files by path for consistency
+This tool is particularly useful when preparing large codebases or documentation as a prompt for an LLM, allowing users to efficiently gather and format multiple files into a structured input.
 
 ## Installation
 
-To use `files-to-prompt`, first ensure you have Rust installed. Then, build the project:
+Install via `cargo`:
 
 ```sh
-cargo build --release
+cargo install files-to-prompt
 ```
 
-Or install it directly using:
-
-```sh
-cargo install --path .
-```
+Pre-compiled binaries for direct download... coming soon!
 
 ## Usage
 
-Run the tool by providing one or more directory paths:
+```
+files-to-prompt [OPTIONS] [PATHS]...
+```
+
+### Arguments
+
+- `[PATHS]...` Directories or files to process. Defaults to the current directory (`.`).
+
+### Options
+
+- `--include-hidden` Include hidden files in the output.
+- `--ignore <IGNORE_PATTERNS>` Glob patterns of files or directories to ignore.
+- `--ignore-gitignore` Ignore `.gitignore` files when scanning directories.
+- `-n, --line-numbers` Include line numbers in the output.
+- `-c, --cxml` Output in an XML-like format suitable for Claude's long context window.
+- `-m, --markdown` Output Markdown fenced code blocks.
+- `-o, --output <OUTPUT>` Output file (default: stdout) or location (for `-r`, default: current directory).
+- `-j, --json` Output JSON compatible with CodeSandbox API/CLI.
+- `-r, --reverse` Reverse operation. Reads files from stdin and writes to disk. Requires `-c/--cxml`.
+- `-h, --help` Print help information.
+- `-V, --version` Print version information.
+
+## Examples
+
+### Concatenate all files recursively in the current directory into a single Markdown prompt
+
+````
+files-to-prompt --markdown
+
+./sample.cpp
+```cpp
+#include <iostream>
+int main() {
+    std::cout << "Hello, C++!" << std::endl;
+    return 0;
+}
+```
+./sample.java
+```java
+public class Sample {
+    public static void main(String[] args) {
+        System.out.println("Hello, Java!");
+    }
+}
+```
+...
+````
+
+### Output in XML-like format for Claude to file
 
 ```sh
-files-to-prompt <path1> [path2] ...
+files-to-prompt --cxml --output output.xml
+
+cat output.xml
+<documents>
+<document path="./file1.txt">
+Contents of file1.txt
+</document>
+<document path="./file2.txt">
+Contents of file2.txt
+</document>
+<document path="./folder/file3.txt">
+Contents of file3.txt
+</document>
+</documents>
 ```
 
-### Example
+### Reverse operation: read from stdin and write files to disk
 
 ```sh
-files-to-prompt ./my_project
+echo '<documents><document path="file1.txt">Contents of file1.txt</document><document path="file2.txt">Contents of file2.txt</document><document path="folder/file3.txt">Contents of file3.txt</document></documents>' \
+  | files-to-prompt --reverse --cxml
 ```
 
-This will output:
+### Concatenate files, including hidden ones, while ignoring specific patterns
 
 ```
-./my_project/file1.txt
-----
-<contents of file1.txt>
-----
-
-./my_project/file2.rs
-----
-<contents of file2.rs>
-----
+files-to-prompt --include-hidden --ignore "\*.log"
 ```
 
-## Error Handling
+### More examples
 
-- If a file cannot be read, an error message is printed.
-- If no path is provided, the program exits with an error message.
-
-## Use Case
-
-This tool is particularly useful when preparing large codebases or documentation as a prompt for an LLM, allowing users to efficiently gather and format multiple files into a structured input.
+For more examples, see [`tests/cli-tests.rs`](tests/cli-tests.rs).
 
 ## Credit
 

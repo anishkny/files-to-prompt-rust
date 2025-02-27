@@ -181,6 +181,10 @@ fn print_files(
   options: &PrintFileOptions,
   mut output: Box<dyn Write>,
 ) {
+  if file_paths.is_empty() {
+    writeln!(output, "No files found.").unwrap();
+    return;
+  }
   if options.cxml {
     writeln!(output, "<documents>").unwrap();
   } else if options.json {

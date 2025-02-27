@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 use std::sync::OnceLock;
-use tempfile::NamedTempFile;
+use tempfile::{NamedTempFile, TempDir};
 
 static TEMP_OUTPUT_FILE_PATH: OnceLock<String> = OnceLock::new();
 pub struct GitignoreRenamer {
@@ -59,4 +59,9 @@ pub fn get_temp_output_file_path() -> &'static str {
       .unwrap()
       .to_string()
   })
+}
+
+pub fn get_temp_dir() -> String {
+  let temp_dir = TempDir::new().expect("Failed to create temp directory");
+  temp_dir.into_path().to_str().unwrap().to_string()
 }

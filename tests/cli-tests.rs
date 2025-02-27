@@ -1,12 +1,13 @@
 use goldenfile::Mint;
-use std::fs::read_to_string;
+use std::fs;
 use std::io::Write;
 use std::path::Path;
-use std::process::Command;
+use std::process::Stdio;
+use std::{fs::read_to_string, process::Command};
 use test_case::test_case;
 
 mod helpers;
-use helpers::{get_temp_output_file_path, rename_gitignore_files};
+use helpers::{get_temp_dir, get_temp_output_file_path, rename_gitignore_files};
 
 const TARGET: &str = if cfg!(debug_assertions) {
   "./target/debug/files-to-prompt"
@@ -65,5 +66,57 @@ fn test_files_to_prompt(input: &[&str], golden_filename: &str) {
     golden_file
       .write_all(&output.stdout)
       .expect("Failed to write to golden file");
+  }
+}
+
+#[test]
+fn test_files_to_prompt_reverse() {
+  let temp_dir = get_temp_dir();
+  println!("Temp dir: {:?}", temp_dir);
+
+  // Read stdin data from the file "tests/inputs/reverse.txt"
+  let stdin_data = fs::read_to_string("tests/inputs/reverse.txt").expect("Failed to read file");
+
+  // Define the arguments as an array of strings
+  let args = vec![
+    "--reverse".to_string(),
+    "--cxml".to_string(),
+    "--output".to_string(),
+    temp_dir.to_string(),
+  ];
+
+  // Run the command with the specified arguments
+  let mut command: Command = Command::new(TARGET);
+  command.args(args);
+
+  // Set up the stdin pipe to send data to the command's stdin
+  let mut child = command
+    .stdin(Stdio::piped()) // Set up a piped stdin
+    .spawn()
+    .expect("Failed to start the command");
+
+  // Write the file content to stdin
+  if let Some(mut stdin) = child.stdin.take() {
+    stdin
+      .write_all(stdin_data.as_bytes())
+      .expect("Failed to write to stdin");
+  }
+
+  // Wait for the command to finish and collect the output
+  let output = child.wait_with_output().expect("Failed to wait on command");
+  assert!(output.status.success());
+
+  // Verify that each file exists and has the correct contents
+  let expected_files = vec![
+    ("file1.txt", "Contents of file1.txt\n"),
+    ("file2.txt", "Contents of file2.txt\n"),
+    ("folder/file3.txt", "Contents of file3.txt\n"),
+  ];
+
+  for (file_name, expected_content) in expected_files {
+    let file_path = Path::new(&temp_dir).join(file_name);
+    let file_contents = fs::read_to_string(file_path.clone()).unwrap();
+    println!("File {:?} contents: {:?}", file_path, file_contents);
+    assert_eq!(file_contents, expected_content);
   }
 }

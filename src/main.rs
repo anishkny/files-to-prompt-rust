@@ -1,10 +1,11 @@
 use clap::Parser;
 use globset::{Glob, GlobSetBuilder};
 use ignore::WalkBuilder;
+use quick_xml::{events::Event, Reader};
 use std::collections::{BTreeSet, HashMap};
-use std::fs;
-use std::io::{self, Write};
-use std::path::Path;
+use std::fs::{self, create_dir_all, File};
+use std::io::{self, Read, Write};
+use std::path::{Path, PathBuf};
 use std::str;
 
 #[derive(Parser, Debug)]
@@ -63,7 +64,11 @@ struct Args {
   )]
   markdown: bool,
 
-  #[arg(short = 'o', long = "output", help = "Output file (default: stdout)")]
+  #[arg(
+    short = 'o',
+    long = "output",
+    help = "Output file (default: stdout) or location (for -r, default: current directory)"
+  )]
   output: Option<String>,
 
   #[arg(
@@ -74,6 +79,15 @@ struct Args {
     conflicts_with_all = &["cxml", "markdown"]
   )]
   json: bool,
+
+  #[arg(
+    short = 'r',
+    long = "reverse",
+    default_value_t = false,
+    help = "Reverse operation. Read files from stdin and write to disk. For now, requires -c/--cxml.",
+    requires = "cxml"
+  )]
+  reverse: bool,
 }
 
 struct ProcessPathOptions {
@@ -103,6 +117,11 @@ fn main() {
     markdown: args.markdown,
     json: args.json,
   };
+
+  if args.reverse {
+    write_files_from_stdin(args.output);
+    return;
+  }
 
   // Collect all the files in the given paths
   let mut file_paths = BTreeSet::new();
@@ -263,4 +282,57 @@ fn path_to_markdown_language(path: &Path) -> String {
   }
 
   "plaintext".to_string()
+}
+
+// Read file contents from stdin and write to disk
+fn write_files_from_stdin(output: Option<String>) {
+  let mut input = String::new();
+  io::stdin().read_to_string(&mut input).unwrap();
+
+  let mut reader = Reader::from_str(&input);
+  let mut buf: Vec<u8> = Vec::new();
+  let mut path = String::new();
+  let mut contents = String::new();
+
+  loop {
+    match reader.read_event_into(&mut buf) {
+      Ok(Event::Eof) => break,
+      Ok(Event::Start(ref e)) if e.name().as_ref() == b"document".as_ref() => {
+        path = e
+          .attributes()
+          .filter_map(|a| a.ok())
+          .find(|a| a.key.as_ref() == b"path".as_ref())
+          .map(|a| String::from_utf8_lossy(&a.value).into_owned())
+          .unwrap_or_default();
+        contents.clear();
+      }
+      Ok(Event::Text(e)) => {
+        contents.push_str(&e.unescape().expect("Failed to unescape text"));
+        contents.push('\n');
+      }
+      Ok(Event::End(ref e)) if e.name().as_ref() == b"document".as_ref() => {
+        if !path.is_empty() {
+          let full_path = if let Some(ref base) = output {
+            PathBuf::from(base).join(&path)
+          } else {
+            PathBuf::from(&path)
+          };
+          if let Some(parent) = full_path.parent() {
+            create_dir_all(parent).expect(&format!("Failed to create directory: {:?}", parent));
+          }
+          let mut file =
+            File::create(&full_path).expect(&format!("Failed to create file: {:?}", full_path));
+          file
+            .write_all(contents.as_bytes())
+            .expect(&format!("Failed to write file: {:?}", full_path));
+        }
+      }
+      Err(e) => {
+        eprintln!("Error reading XML: {:?}", e);
+        break;
+      }
+      _ => {}
+    }
+    buf.clear();
+  }
 }

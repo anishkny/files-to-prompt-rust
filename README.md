@@ -10,8 +10,6 @@ This tool is particularly useful when preparing large codebases or documentation
 
 ## Installation
 
-Install via `cargo`:
-
 ```sh
 cargo install files-to-prompt
 ```

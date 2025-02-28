@@ -2,7 +2,7 @@ use clap::Parser;
 use globset::{Glob, GlobSetBuilder};
 use ignore::WalkBuilder;
 use quick_xml::{events::Event, Reader};
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::{self, create_dir_all, File};
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
@@ -88,12 +88,21 @@ struct Args {
     requires = "cxml"
   )]
   reverse: bool,
+
+  #[arg(
+    short = 'e',
+    long = "extension",
+    help = "Only include files with the given extension(s)",
+    action = clap::ArgAction::Append
+  )]
+  extensions: Vec<String>,
 }
 
 struct ProcessPathOptions {
   include_hidden: bool,
   ignore_patterns: Vec<String>,
   ignore_gitignore: bool,
+  extensions: Vec<String>,
 }
 
 struct PrintFileOptions {
@@ -109,6 +118,7 @@ fn main() {
     include_hidden: args.include_hidden,
     ignore_patterns: args.ignore_patterns.clone(),
     ignore_gitignore: args.ignore_gitignore,
+    extensions: args.extensions.clone(),
   };
 
   let print_file_options = PrintFileOptions {
@@ -144,6 +154,7 @@ fn process_path(path: &Path, options: &ProcessPathOptions, file_paths: &mut BTre
     include_hidden,
     ignore_patterns,
     ignore_gitignore,
+    extensions,
   } = options;
   let mut walker = WalkBuilder::new(path);
   walker.hidden(!include_hidden);
@@ -156,9 +167,29 @@ fn process_path(path: &Path, options: &ProcessPathOptions, file_paths: &mut BTre
     }
   }
   let glob_set = glob_builder.build().unwrap();
+  let extensions_set: HashSet<String> = extensions.iter().cloned().collect();
 
   let walker = walker
-    .filter_entry(move |entry| !glob_set.is_match(entry.path()))
+    .filter_entry(move |entry| {
+      let path = entry.path();
+
+      // Skip ignored files
+      if glob_set.is_match(path) {
+        return false;
+      }
+
+      // If extensions are specified, only include files with those extensions
+      if !extensions_set.is_empty() {
+        if let Some(ext) = path.extension() {
+          if !extensions_set.contains(ext.to_str().unwrap()) {
+            return false;
+          }
+        }
+      }
+
+      // Include all other files
+      true
+    })
     .build();
 
   for result in walker {

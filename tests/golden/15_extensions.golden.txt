@@ -1,0 +1,20 @@
+tests/inputs/11_markdown/sample.c
+----
+#include <stdio.h>
+int main() {
+    printf("Hello, C!\n");
+    return 0;
+}
+
+----
+
+tests/inputs/11_markdown/sample.cpp
+----
+#include <iostream>
+int main() {
+    std::cout << "Hello, C++!" << std::endl;
+    return 0;
+}
+
+----
+

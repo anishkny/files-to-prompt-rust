@@ -11,7 +11,7 @@ use std::str;
 #[derive(Parser, Debug)]
 #[command(
   version,
-  about = "Concatenates a directory full of files into a single prompt for use with LLMs."
+  about = "Concatenates a directory full of files into a single prompt for use with LLMs"
 )]
 struct Args {
   #[arg(default_value = ".")]
@@ -50,7 +50,7 @@ struct Args {
     short = 'c',
     long = "cxml",
     default_value_t = false,
-    help = "Output in XML-ish format suitable for Claude's long context window.",
+    help = "Output in XML-ish format suitable for Claude's long context window",
     conflicts_with_all = &["markdown", "json"]
   )]
   cxml: bool,
@@ -59,7 +59,7 @@ struct Args {
     short = 'm',
     long = "markdown",
     default_value_t = false,
-    help = "Output Markdown fenced code blocks.",
+    help = "Output Markdown fenced code blocks",
     conflicts_with_all = &["cxml", "json"]
   )]
   markdown: bool,
@@ -75,7 +75,7 @@ struct Args {
     short = 'j',
     long = "json",
     default_value_t = false,
-    help = "Output JSON compatible with CodeSandbox API/CLI.",
+    help = "Output JSON compatible with CodeSandbox API/CLI",
     conflicts_with_all = &["cxml", "markdown"]
   )]
   json: bool,

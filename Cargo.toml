@@ -1,6 +1,6 @@
 [package]
 name = "files-to-prompt"
-version = "0.9.0"
+version = "1.0.0"
 edition = "2021"
 authors = ["Anish Karandikar <anishkny@gmail.com>"]
 description = "Concatenates a directory full of files into a single prompt for use with LLMs"

@@ -24,21 +24,22 @@ files-to-prompt [OPTIONS] [PATHS]...
 
 ### Arguments
 
-- `[PATHS]...` Directories or files to process. Defaults to the current directory (`.`).
+- `[PATHS]...` Directories or files to process. Defaults to the current directory (`.`)
 
 ### Options
 
-- `--include-hidden` Include hidden files in the output.
-- `--ignore <IGNORE_PATTERNS>` Glob patterns of files or directories to ignore.
-- `--ignore-gitignore` Ignore `.gitignore` files when scanning directories.
-- `-n, --line-numbers` Include line numbers in the output.
-- `-c, --cxml` Output in an XML-like format suitable for Claude's long context window.
-- `-m, --markdown` Output Markdown fenced code blocks.
-- `-o, --output <OUTPUT>` Output file (default: stdout) or location (for `-r`, default: current directory).
-- `-j, --json` Output JSON compatible with CodeSandbox API/CLI.
+- `--include-hidden` Include hidden files in the output
+- `--ignore <IGNORE_PATTERNS>` Glob patterns of files or directories to ignore
+- `--ignore-gitignore` Ignore `.gitignore` files when scanning directories
+- `-n, --line-numbers` Include line numbers in the output
+- `-c, --cxml` Output in an XML-like format suitable for Claude's long context window
+- `-m, --markdown` Output Markdown fenced code blocks
+- `-o, --output <OUTPUT>` Output file (default: stdout) or location (for `-r`, default: current directory)
+- `-j, --json` Output JSON compatible with CodeSandbox API/CLI
 - `-r, --reverse` Reverse operation. Reads files from stdin and writes to disk. Requires `-c/--cxml`.
-- `-h, --help` Print help information.
-- `-V, --version` Print version information.
+- `-e, --extension <EXTENSIONS>` Only include files with the given extension(s)
+- `-h, --help` Print help information
+- `-V, --version` Print version information
 
 ## Examples
 

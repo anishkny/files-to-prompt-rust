@@ -1,6 +1,6 @@
 [package]
 name = "files-to-prompt"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 authors = ["Anish Karandikar <anishkny@gmail.com>"]
 description = "Concatenates a directory full of files into a single prompt for use with LLMs"
@@ -15,7 +15,6 @@ readme = "README.md"
 clap = { version = "4.5.31", features = ["derive"] }
 globset = "0.4.15"
 ignore = "0.4.23"
-quick-xml = "0.37.2"
 tempfile = "3.17.1"
 
 [dev-dependencies]

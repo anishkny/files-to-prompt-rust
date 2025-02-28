@@ -1,11 +1,10 @@
 use clap::Parser;
 use globset::{Glob, GlobSetBuilder};
 use ignore::WalkBuilder;
-use quick_xml::{events::Event, Reader};
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::{self, create_dir_all, File};
-use std::io::{self, Read, Write};
-use std::path::{Path, PathBuf};
+use std::io::{self, BufRead, Write};
+use std::path::Path;
 use std::str;
 
 #[derive(Parser, Debug)]
@@ -321,53 +320,37 @@ fn path_to_markdown_language(path: &Path) -> String {
 
 // Read file contents from stdin and write to disk
 fn write_files_from_stdin(output: Option<String>) {
-  let mut input = String::new();
-  io::stdin().read_to_string(&mut input).unwrap();
+  let stdin = io::stdin();
+  let base_path = output.unwrap_or_else(|| "./".to_string());
 
-  let mut reader = Reader::from_str(&input);
-  let mut buf: Vec<u8> = Vec::new();
-  let mut path = String::new();
-  let mut contents = String::new();
+  let mut current_path: Option<String> = None;
+  let mut content = Vec::new();
 
-  loop {
-    match reader.read_event_into(&mut buf) {
-      Ok(Event::Eof) => break,
-      Ok(Event::Start(ref e)) if e.name().as_ref() == b"document".as_ref() => {
-        path = e
-          .attributes()
-          .filter_map(|a| a.ok())
-          .find(|a| a.key.as_ref() == b"path".as_ref())
-          .map(|a| String::from_utf8_lossy(&a.value).into_owned())
-          .unwrap_or_default();
-        contents.clear();
+  for line in stdin.lock().lines() {
+    let line = line.unwrap();
+    if line.starts_with("<document path=") {
+      if let Some(path) = current_path.take() {
+        write_to_file(&base_path, &path, &content);
       }
-      Ok(Event::Text(e)) => {
-        contents.push_str(&e.unescape().expect("Failed to unescape text"));
-        contents.push('\n');
+      current_path = Some(line.split('"').nth(1).unwrap_or_default().to_string());
+      content.clear();
+    } else if line == "</document>" {
+      if let Some(path) = current_path.take() {
+        write_to_file(&base_path, &path, &content);
       }
-      Ok(Event::End(ref e)) if e.name().as_ref() == b"document".as_ref() => {
-        if !path.is_empty() {
-          let full_path = if let Some(ref base) = output {
-            PathBuf::from(base).join(&path)
-          } else {
-            PathBuf::from(&path)
-          };
-          if let Some(parent) = full_path.parent() {
-            create_dir_all(parent).expect(&format!("Failed to create directory: {:?}", parent));
-          }
-          let mut file =
-            File::create(&full_path).expect(&format!("Failed to create file: {:?}", full_path));
-          file
-            .write_all(contents.as_bytes())
-            .expect(&format!("Failed to write file: {:?}", full_path));
-        }
-      }
-      Err(e) => {
-        eprintln!("Error reading XML: {:?}", e);
-        break;
-      }
-      _ => {}
+    } else {
+      content.push(line);
     }
-    buf.clear();
+  }
+}
+
+fn write_to_file(base_path: &str, relative_path: &str, content: &[String]) {
+  let full_path = Path::new(base_path).join(relative_path);
+  if let Some(parent) = full_path.parent() {
+    create_dir_all(parent).expect("Failed to create directory");
+  }
+  let mut file = File::create(full_path).expect("Failed to create file");
+  for line in content {
+    writeln!(file, "{}", line).expect("Failed to write to file");
   }
 }

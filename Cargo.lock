@@ -191,13 +191,12 @@ checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
 name = "files-to-prompt"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "clap",
  "globset",
  "goldenfile",
  "ignore",
- "quick-xml",
  "tempfile",
  "test-case",
 ]
@@ -304,15 +303,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "60946a68e5f9d28b0dc1c21bb8a97ee7d018a8b322fa57838ba31cc878e22d99"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "quick-xml"
-version = "0.37.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "165859e9e55f79d67b96c5d96f4e88b6f2695a1972849c15a6a3f5c59fc2c003"
-dependencies = [
- "memchr",
 ]
 
 [[package]]

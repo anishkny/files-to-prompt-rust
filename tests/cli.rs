@@ -113,6 +113,7 @@ fn test_files_to_prompt_reverse() {
     ("file1.txt", "Contents of file1.txt\n"),
     ("file2.txt", "Contents of file2.txt\n"),
     ("folder/file3.txt", "Contents of file3.txt\n"),
+    ("folder/xml-escaped.txt", "<\n>\n&\n'\n\"\n"),
   ];
 
   for (file_name, expected_content) in expected_files {

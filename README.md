@@ -98,6 +98,12 @@ echo '<documents><document path="file1.txt">Contents of file1.txt</document><doc
 files-to-prompt --include-hidden --ignore "\*.log"
 ```
 
+### Only include specified extensions
+
+```
+files-to-prompt -e c -e cpp -e h
+```
+
 ### More examples
 
 For more examples, see [`tests/cli-tests.rs`](tests/cli-tests.rs).

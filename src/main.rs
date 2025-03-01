@@ -158,6 +158,7 @@ fn process_path(path: &Path, options: &ProcessPathOptions, file_paths: &mut BTre
   let mut walker = WalkBuilder::new(path);
   walker.hidden(!include_hidden);
   walker.git_ignore(!ignore_gitignore);
+  walker.require_git(false);
 
   let mut glob_builder = GlobSetBuilder::new();
   for pattern in ignore_patterns {

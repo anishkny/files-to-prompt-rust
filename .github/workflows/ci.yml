@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - name: Cache dependencies
@@ -35,4 +38,6 @@ jobs:
         run: cargo publish --no-verify
       - name: Merge Dependabot PR
         if: github.actor == 'dependabot[bot]' && github.event.pull_request
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: gh pr merge ${{ github.event.pull_request.number }} --squash --merge

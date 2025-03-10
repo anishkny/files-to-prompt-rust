@@ -15,7 +15,7 @@ readme = "README.md"
 clap = { version = "4.5.31", features = ["derive"] }
 globset = "0.4.16"
 ignore = "0.4.23"
-tempfile = "3.17.1"
+tempfile = "3.18.0"
 
 [dev-dependencies]
 goldenfile = "1.8.0"

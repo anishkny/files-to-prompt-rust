@@ -63,5 +63,5 @@ pub fn get_temp_output_file_path() -> &'static str {
 
 pub fn get_temp_dir() -> String {
   let temp_dir = TempDir::new().expect("Failed to create temp directory");
-  temp_dir.into_path().to_str().unwrap().to_string()
+  temp_dir.keep().to_str().unwrap().to_string()
 }

@@ -228,12 +228,13 @@ dependencies = [
 
 [[package]]
 name = "goldenfile"
-version = "1.9.1"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ef8d7e733be5a2b7b473a8bf6865d6dda7911ca010241f459439bac27df0013"
+checksum = "4ce2238f730d493a06ef6746713fe0b56acecc88485892ae65c50d2db9bf977b"
 dependencies = [
  "scopeguard",
  "similar-asserts",
+ "static_assertions",
  "tempfile",
  "yansi",
 ]
@@ -398,6 +399,12 @@ dependencies = [
  "console",
  "similar",
 ]
+
+[[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "strsim"
